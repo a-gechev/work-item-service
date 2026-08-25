@@ -175,13 +175,19 @@ Invariants:         An issued UserId is permanent and always resolves; there is 
                     Email is globally unique and permanent; a deactivated user's address
                       is never released for reuse
                     The last remaining ADMIN cannot be deactivated
-                    Deactivation is idempotent; reactivation restores the existing record
+                    Deactivation is idempotent
+                    Reactivation restores standing only — identity, email, display name
+                      and role are never lost; nothing outside Users is restored
                     Display name non-blank
 ```
 
 Assignment is validated against a user's status at the time it is made. A user deactivated
 afterwards is handled by the `UserDeactivated` listener in Work Items, which unassigns their open
-items — the two halves of one rule, one synchronous and one eventual.
+items — the two halves of one rule, one synchronous and one eventual. Finished items keep their
+deactivated assignee as history.
+
+A returning (reactivated) user is assigned work explicitly, and the assignment invariant permits it again the moment they are active. This is
+also why no `UserReactivated` event exists: there is nothing for a consumer to do.
 
 ## Design decisions
 
