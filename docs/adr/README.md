@@ -6,12 +6,13 @@ afterwards — the commit dates should match the ADR dates.
 
 | ADR | Decision | Status |
 |---|---|---|
-| 0001 | Modular monolith over microservices | Accepted |
+| 0001 | Modular monolith over microservices | Accepted — module layout amended by 0007 |
 | 0002 | PostgreSQL over MongoDB | Proposed |
 | 0003 | Testcontainers over an in-memory H2 database | Proposed |
 | 0004 | Transactional outbox over publishing events directly | Proposed |
 | 0005 | A separate Users context over a shared user model | Accepted |
 | 0006 | The dependency graph as a single consistency boundary | Proposed |
+| 0007 | No shared kernel; contexts integrate through published API modules | Accepted |
 
 Each ADR follows: context → options considered → decision → consequences → what we gave up.
 
