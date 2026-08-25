@@ -37,8 +37,9 @@ deliberately small. What was considered and declined:
   stronger invariant (acyclicity) and a real algorithm (cycle detection, topological ordering).
 - **Per-user WIP limits and "is this person available for more work?"** — the *count* belongs to
   Work Items, the *limit* would belong to Users, and composing them needs an orchestration layer
-  this system does not otherwise justify. _The seam is named:_ `WorkItemApi.activeCountFor(assigneeId)`
-  answers the counting half today with no cross-context dependency.
+  this system does not otherwise justify. _The seam is named:_ `WorkItemApi.openItemCountFor(assigneeId)`
+  answers the counting half today with no cross-context dependency. It counts items in any status
+  other than `FINISHED`, so whoever imposes a limit later chooses the threshold.
 - **Fine-grained permissions (`canEdit`, `canDelete`) as user attributes** — authorisation over a
   work item depends on the work item's own state and ownership, so it is decided in Work Items,
   next to the resource. Users owns *standing* (`MEMBER` / `ADMIN`); Work Items owns *what that

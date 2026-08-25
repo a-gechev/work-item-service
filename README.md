@@ -112,7 +112,7 @@ which is what makes the ordering operation total at read time.
 Context:            Work Items
 
 Owns:               WorkItem identity (id, displayName, description, assignee, createdBy)
-                    WorkItem status (NEW, IN_TRIAGE, ACTIVE, FOR_REVIEW, FINISHED)
+                    WorkItem status (NEW, IN_TRIAGE, IN_PROGRESS, FOR_REVIEW, FINISHED)
                       and the permitted transitions between them
                     Dependency edges between work items, and the acyclicity of that graph
                     The answer to "what is startable right now?" and "in what order?"
@@ -123,7 +123,7 @@ Publishes:          WorkItemSummary { id, displayName, status, assignee }
                     List<WorkItemSummary> findByAssignee(UserId assignee);
                     List<WorkItemSummary> startable();
                     List<WorkItemSummary> plan();
-                    int                   activeCountFor(UserId assignee);
+                    int                   openItemCountFor(UserId assignee);
 
                     event WorkItemStatusChanged { workItemId, from, to, occurredAt }
 
@@ -141,11 +141,16 @@ Invariants:         ID is permanent and always resolves
                       transitions are rejected in the domain
                     Adding a dependency edge that would close a cycle is rejected
                       (a self-dependency is the degenerate case)
-                    A work item cannot become ACTIVE while any prerequisite is unfinished
+                    A work item cannot become IN_PROGRESS while any prerequisite is unfinished
                     A work item cannot be assigned to a DEACTIVATED user
                     Only ADMIN may transition a work item to FINISHED
                     Only ADMIN may create a work item
 ```
+
+`openItemCountFor` counts a user's work items in any status other than `FINISHED`. The name does not
+track a lifecycle state on purpose: the published contract then survives a change to the status set,
+and a consumer imposing a WIP limit picks its own threshold rather than inheriting one. "Active" is
+reserved throughout for a *user's* standing and never describes work.
 
 ```
 Context:            Users
