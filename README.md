@@ -21,39 +21,65 @@ Modular monolith. One Gradle module per bounded context. Modules may only refere
 published API packages — this boundary is enforced by ArchUnit tests that fail the build, not by
 convention.
 
+### Modules
+
+| Module | Holds |
+|---|---|
+| `work-items` | The Work Items context, layered hexagonally |
+| `users-api` | The Users context's published contract — interfaces, `UserSummary`, `UserDeactivated` |
+| `users-impl` | The Users context's domain, application and adapters |
+| `outbox` | The transactional outbox: `OutboxWriter`, `OutboxEntry`, the publishing poller |
+| `app` | The single deployable. Wires implementations to ports; the only module that knows the whole graph |
+
+**There is no shared kernel.** One was specified in ADR-0001 and removed in
+[ADR-0007](docs/adr/0007-no-shared-kernel.md): nothing turned out to belong in it. The contexts
+integrate through `users-api` — a published contract with a single owner — which is a stricter
+relationship than a jointly owned module.
+
 ```mermaid
 flowchart TB
-    subgraph WorkItems["Work Items context"]
+    subgraph WI["work-items"]
         direction TB
-        WI_API["WorkItemApi<br/>resolve · findByAssignee<br/>startable · plan · activeCountFor"]
-        WI_DOMAIN["Domain: WorkItem, status<br/>lifecycle, dependency DAG"]
-        WI_LISTENER["UserDeactivated listener"]
+        WI_IN["adapters/in<br/>REST · UserDeactivated listener"]
+        WI_APP["application<br/>use cases · WorkItemEventPublisher (port)"]
+        WI_DOM["domain<br/>WorkItem · status lifecycle · dependency DAG"]
+        WI_OUT["adapters/out<br/>OutboxWorkItemEventPublisher · JPA"]
     end
 
-    subgraph UsersApi["users-api"]
-        U_API["UserApi · UserSummary<br/>UserDeactivated"]
+    subgraph UI["users-impl"]
+        direction TB
+        U_APP["application<br/>use cases · UserEventPublisher (port)"]
+        U_DOM["domain<br/>identity · standing · lifecycle"]
+        U_OUT["adapters/out<br/>OutboxUserEventPublisher · JPA"]
     end
 
-    subgraph UsersImpl["users-impl"]
-        U_DOMAIN["Domain: identity,<br/>standing, lifecycle"]
+    subgraph UA["users-api"]
+        U_PUB["UserApi · UserSummary<br/>UserDeactivated"]
     end
 
-    subgraph Shared["Shared kernel"]
-        OUTBOX["Transactional outbox"]
+    subgraph OB["outbox"]
+        OB_W["OutboxWriter · OutboxEntry<br/>publishing poller"]
     end
 
-    WI_API --> WI_DOMAIN
-    U_DOMAIN --> U_API
-    WI_DOMAIN -. "resolve / resolveAll" .-> U_API
-    U_API -. "UserDeactivated" .-> WI_LISTENER
-    WI_DOMAIN --> OUTBOX
-    U_DOMAIN --> OUTBOX
+    WI_IN --> WI_APP
+    WI_APP --> WI_DOM
+    WI_OUT --> WI_APP
+    WI_OUT --> OB_W
+    U_APP --> U_DOM
+    U_OUT --> U_APP
+    U_OUT --> OB_W
+    U_DOM --> U_PUB
+    WI_APP -. "resolve / resolveAll" .-> U_PUB
+    OB_W -. "UserDeactivated" .-> WI_IN
 
-    style WorkItems fill:#eef,stroke:#448
-    style UsersApi fill:#efe,stroke:#484
-    style UsersImpl fill:#efe,stroke:#484
-    style Shared fill:#fee,stroke:#844
+    style WI fill:#eef,stroke:#448
+    style UA fill:#efe,stroke:#484
+    style UI fill:#efe,stroke:#484
+    style OB fill:#fee,stroke:#844
 ```
+
+Arrows point in the direction of dependency. Two things are worth reading off the diagram: no arrow
+leaves a `domain` box, and no arrow reaches the `outbox` module from anywhere but `adapters/out`.
 
 The dependency between contexts runs in **one direction only**: Work Items depends on `users-api`;
 Users depends on nothing. The graph of contexts is acyclic, which is what keeps Users independently
@@ -61,9 +87,13 @@ buildable and testable and leaves the extraction path open.
 
 ### Rules that apply to every context
 
-Stated once here rather than repeated per context:
+Stated once here rather than repeated per context, and enforced by ArchUnit rather than by review:
 
 - The `domain` layer depends on no framework — no Spring, no JPA, no Jakarta, no HTTP types
+- The `domain` layer depends on no infrastructure either. Domain events are **returned**, never
+  published from inside an aggregate; the application layer writes them to the outbox in the same
+  transaction as the state change
+- Only `adapters/out` may reference the `outbox` module. Nothing in `domain` or `application` may
 - A context may reference another only through its published `api` module, never its `impl`
 - No ambient caller identity: the acting `UserId` is passed as an explicit parameter. Nothing in the
   domain or application layers reads a security context

@@ -16,8 +16,10 @@ reason.
 ## Infrastructure
 
 - **Actual message broker** — in-process event dispatch is enough to prove the outbox pattern.
-  _The seam is named:_ the outbox publisher sits behind a `DomainEventPublisher` interface;
-  swapping in RabbitMQ or Kafka replaces one implementation class and no domain code.
+  _The seam is named:_ each context declares its own event-publisher port in its application
+  layer (`WorkItemEventPublisher`, `UserEventPublisher`), and an adapter in `adapters/out`
+  implements that port against the `outbox` module. Swapping in RabbitMQ or Kafka replaces one
+  adapter class per context and no domain or application code. See ADR-0007.
 - **Token issuance, self-registration, password management** — this service *validates* JWTs,
   it does not issue them. Authentication is the identity provider's job, and drawing that line
   is itself the decision worth recording. See ADR-0005.
