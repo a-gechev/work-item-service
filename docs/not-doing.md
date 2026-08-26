@@ -6,8 +6,13 @@ reason.
 
 ## Whole capabilities
 
-- **Notifications bounded context** — out of scope; the outbox already demonstrates reliable
-  event publishing, a third context wouldn't add a new architectural lesson.
+- **Notifications bounded context** — not built. Work item events are written to the outbox; a
+  notification service would consume them. _The seam exists for a reason that holds whether or not
+  the consumer is ever built:_ sending mail inside the state-changing transaction is the failure
+  the outbox pattern is for. Commit them together and either the transaction rolls back after the
+  mail has already gone out, or a mail failure takes a valid state change down with it. Recording
+  the fact and acting on the fact have to be separately committable. A third bounded context is out
+  of scope here, and the pattern is demonstrated by the seam rather than by the feature.
 - **Recurring tasks / timezone handling** — real complexity, but orthogonal to the two things
   this project is meant to prove (module boundaries, dependency-graph algorithm).
 - **Metrics dashboards, distributed tracing** — operational maturity that doesn't test the
@@ -41,9 +46,17 @@ deliberately small. What was considered and declined:
   answers the counting half today with no cross-context dependency. It counts items in any status
   other than `FINISHED`, so whoever imposes a limit later chooses the threshold.
 - **Fine-grained permissions (`canEdit`, `canDelete`) as user attributes** — authorisation over a
-  work item depends on the work item's own state and ownership, so it is decided in Work Items,
-  next to the resource. Users owns *standing* (`MEMBER` / `ADMIN`); Work Items owns *what that
-  standing permits here*. See ADR-0005.
+  work item depends on the work item's own state and the requester's relationship to it, so it is
+  decided in Work Items, next to the resource. Users owns *standing* (`MEMBER` / `ADMIN`); Work
+  Items owns *what that standing permits here*. See ADR-0005.
+
+## Inside the Work Items context
+
+- **Work item ownership** — not modelled. A work item has an assignee and no owner. In the domain
+  this describes an owner is real and distinct from the assignee: accountable for the item, versus
+  currently doing it. The field itself is cheap; the behaviour that would make it mean anything is
+  not — a second authorisation path over every operation, and a second recipient in every
+  notification. An owner attribute with no behaviour attached is vocabulary without design.
 
 ## Scope freeze
 
