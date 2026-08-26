@@ -1,16 +1,14 @@
-# Compiled class file
+# Gradle
+.gradle/
+build/
+
+# Compiled class files
 *.class
 
-# Log file
+# Log files
 *.log
 
-# BlueJ files
-*.ctxt
-
-# Mobile Tools for Java (J2ME)
-.mtj.tmp/
-
-# Package Files #
+# Package files
 *.jar
 *.war
 *.nar
@@ -18,7 +16,20 @@
 *.zip
 *.tar.gz
 *.rar
+# ...except the Gradle wrapper, which MUST be committed — a clean clone
+# cannot build without it.
+!gradle/wrapper/gradle-wrapper.jar
 
-# virtual machine crash logs, see http://www.java.com/en/download/help/error_hotspot.xml
+# JVM crash logs
 hs_err_pid*
 replay_pid*
+
+# IDE
+.idea/
+*.iml
+out/
+.vscode/
+
+# OS
+Thumbs.db
+.DS_Store

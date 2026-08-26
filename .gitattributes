@@ -1,0 +1,12 @@
+# Normalise line endings: LF in the repository, native in the working tree.
+* text=auto eol=lf
+
+# Windows scripts must keep CRLF.
+*.bat text eol=crlf
+*.cmd text eol=crlf
+
+# gradlew runs on the Linux CI runner and must be LF.
+gradlew text eol=lf
+
+# Never transform binaries.
+*.jar binary
