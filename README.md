@@ -152,6 +152,13 @@ track a lifecycle state on purpose: the published contract then survives a chang
 and a consumer imposing a WIP limit picks its own threshold rather than inheriting one. "Active" is
 reserved throughout for a *user's* standing and never describes work.
 
+Work Items has no published `api` module, unlike Users, because nothing in this system consumes its
+contract: Users must never know work items exist, commands arrive over REST, and the two named
+consumers — a notifications context and per-user WIP limits — are both in
+[`docs/not-doing.md`](docs/not-doing.md). Splitting out `work-items-api` is the move `users-api` /
+`users-impl` already demonstrates, and it happens the day something needs it rather than in
+anticipation.
+
 ```
 Context:            Users
 
