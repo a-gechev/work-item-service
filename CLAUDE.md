@@ -84,10 +84,18 @@ Two things govern how they are written:
 - **A rule that has never been seen to fail is a comment.** Commit each rule with a deliberate
   violation, watch the build go red, then delete the violation. Six rules, six red runs, no
   exceptions.
-- **A rule whose package pattern matches zero classes passes.** Assert the class count
-  (`allowEmptyShould(false)`, or `archRule.failOnEmptyShould=true` in `archunit.properties`) rather
-  than trusting green. Most of these packages are empty today, so several rules would pass over
-  nothing at all.
+- **Phrase every rule from the guarded side, not the protected target.**
+  `noClasses().that().resideInAnyPackage("..domain..", "..application..")
+  .should().dependOnClassesThat().resideInAPackage("..outbox..")` checks 4 classes today;
+  `classes().that().resideInAPackage("..outbox..").should().onlyBeAccessed()...` checks none,
+  because `outbox` has no compiled class. Same rule, and only one of them is evidence.
+  `failOnEmptyShould` stays at its default — a rule that checks nothing should go red.
+  **Rule 5 names its slices instead of counting them:** the slice pattern is scoped explicitly
+  to `workitems`, `users` and `outbox` rather than a wildcard, because a wildcard also catches
+  `architecture-tests`'s own test classes under `..architecture..` as a spurious extra slice.
+  Naming the three replaces the count-based workaround this file used to describe here — written
+  when `outbox` held no compiled class, so the count was 2 rather than 3. `outbox` now holds
+  `OutboxWriter` (Rule 6), so there is no longer a count to hardcode or a slice to wait on.
 
 **Verified:** ArchUnit 1.5.0 resolves and runs against JUnit 6.1.3 here — confirmed by a throwaway
 probe rule in `architecture-tests`, no catalog change needed. That probe is not one of the six and
