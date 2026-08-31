@@ -13,4 +13,5 @@ include(
     "users-impl",
     "outbox",
     "app",
+    "architecture-tests",
 )
