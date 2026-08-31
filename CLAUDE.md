@@ -6,9 +6,10 @@ A modular monolith whose architectural boundaries are to be enforced by tests ra
 under *Known drift* below — and this file is a summary and a working agreement.
 
 **Where the repo actually is:** the skeleton compiles, has no behaviour, and enforces nothing yet.
-There are no test sources. `archunit-junit5` sits in the version catalog referenced by no build file.
-Writing the first six rules is the current work; until they exist and have each been seen to fail,
-every boundary in this document is a convention, not a constraint.
+The `architecture-tests` module exists and applies `archunit-junit5` from the catalog, but the only
+test in it is a throwaway probe confirming the toolchain resolves — see *Unverified* below. Writing
+the first six rules is the current work; until they exist and have each been seen to fail, every
+boundary in this document is a convention, not a constraint.
 
 ## Build
 
@@ -72,20 +73,11 @@ assertion below.
 
 ## The six rules
 
-Referred to by number here, in the README, and in `outbox/package-info.java`. Keep the numbering
-stable.
+**`README.md`, under "The six rules", is the single source of truth. They are not restated here.**
 
-1. **Layer.** `..domain..` may not depend on `org.springframework..`, `jakarta.persistence..`,
-   `com.fasterxml..`, `..application..` or `..adapters..`.
-2. **Context boundary.** Nothing outside `..users..` may access `..users.impl..`; only `..users.api..`
-   is reachable.
-3. **Direction.** `..users..` must never depend on `..workitems..`.
-4. **No ambient identity.** No `SecurityContextHolder` in `..domain..` or `..application..`.
-5. **No cycles.** `slices().matching("..workitem.(*)..").should().beFreeOfCycles()` — assert the slice
-   count is 3 (`workitems`, `users`, `outbox`) before trusting a green run.
-6. **Infrastructure reachable only from the edge.** Only `..adapters.out..` may depend on `..outbox..`.
-   Gradle cannot express this — its graph has module granularity, so the build can only say that
-   `work-items` as a whole may see `outbox`. Rule 6 is the only enforcement of the real constraint.
+Refer to them by number. The numbering is stable and is cited from the README, from the
+`package-info.java` of each package a rule protects, and from the test that enforces it —
+renumbering means editing all three.
 
 Two things govern how they are written:
 
@@ -97,9 +89,9 @@ Two things govern how they are written:
   than trusting green. Most of these packages are empty today, so several rules would pass over
   nothing at all.
 
-**Unverified:** ArchUnit 1.5.0 against JUnit 6 has never been run here. Write one trivial rule and
-run it before the other five. If it fails to resolve, the fallback is pinning `junit = "5.14.x"` in
-the catalog — one line, which is the property a version catalog exists to give you.
+**Verified:** ArchUnit 1.5.0 resolves and runs against JUnit 6.1.3 here — confirmed by a throwaway
+probe rule in `architecture-tests`, no catalog change needed. That probe is not one of the six and
+carries no numbering; it stays only until the first real rule makes it redundant.
 
 ## Non-negotiables
 

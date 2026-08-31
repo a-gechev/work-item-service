@@ -85,20 +85,25 @@ The dependency between contexts runs in **one direction only**: Work Items depen
 Users depends on nothing. The graph of contexts is acyclic, which is what keeps Users independently
 buildable and testable and leaves the extraction path open.
 
-### Rules that apply to every context
+### The six rules
 
-Stated once here rather than repeated per context, and enforced by ArchUnit rather than by review:
+1. **Layer.** The `domain` layer depends on no framework and no infrastructure — no Spring, no JPA,
+   no Jackson, no HTTP types — and never on `application` or `adapters`.
+2. **Context boundary.** A context is reachable only through its published `api` module. Nothing
+   outside `users` may reference `users.impl`.
+3. **Direction.** The dependency between contexts runs one way only: `users` never depends on
+   `workitems`.
+4. **No ambient identity.** The acting `UserId` is an explicit parameter. Nothing in `domain` or
+   `application` reads a security context.
+5. **No cycles.** The contexts — `workitems`, `users`, `outbox` — are free of dependency cycles.
+6. **Infrastructure only at the edge.** Only `adapters/out` may reference the `outbox` module;
+   nothing in `domain` or `application` may. Gradle can only say that a whole module may see
+   `outbox` — rule 6 is what says which packages may.
 
-- The `domain` layer depends on no framework — no Spring, no JPA, no Jakarta, no HTTP types
-- The `domain` layer depends on no infrastructure either. Domain events are **returned**, never
-  published from inside an aggregate; the application layer writes them to the outbox in the same
-  transaction as the state change
-- Only `adapters/out` may reference the `outbox` module. Nothing in `domain` or `application` may
-- A context may reference another only through its published `api` module, never its `impl`
-- No ambient caller identity: the acting `UserId` is passed as an explicit parameter. Nothing in the
-  domain or application layers reads a security context
-
-Each context is layered hexagonally: domain → application → adapters.
+Each context is layered hexagonally: domain → application → adapters. Domain events are **returned**
+by aggregate methods, never published from inside one; the application layer writes them to the
+outbox in the same transaction as the state change. That follows from rule 1 rather than adding to
+it — the event-publisher port lives in `application`, which `domain` may not reach.
 
 ### Dependency graph convention
 
