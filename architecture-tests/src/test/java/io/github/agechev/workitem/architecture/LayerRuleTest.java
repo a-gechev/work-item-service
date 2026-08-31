@@ -20,8 +20,8 @@ class LayerRuleTest {
                         "com.fasterxml..",
                         "..application..",
                         "..adapters..")
-                .because("The domain layer must depend on no framework, no infrastructure, "
-                + "and no outer layer - see README.MD's six rules, Rule 1(Layer)");
+                .because("the domain layer depends on no framework and no outer layer "
+                + "- see README.md, the six rules, Rule 1 (Layer)");
         rule.check(classes);
     }
 }
