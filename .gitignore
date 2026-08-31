@@ -27,7 +27,7 @@ replay_pid*
 # IDE
 .idea/
 *.iml
-out/
+/out/
 .vscode/
 
 # OS
