@@ -98,8 +98,8 @@ Two things govern how they are written:
   `OutboxWriter` (Rule 6), so there is no longer a count to hardcode or a slice to wait on.
 
 **Verified:** ArchUnit 1.5.0 resolves and runs against JUnit 6.1.3 here — confirmed by a throwaway
-probe rule in `architecture-tests`, no catalog change needed. That probe is not one of the six and
-carries no numbering; it stays only until the first real rule makes it redundant.
+probe rule (`ToolchainProbeTest`) that carried no numbering and was never one of the six. It stayed
+only until the first real rule made it redundant; all six now exist, so it has been deleted.
 
 ## Non-negotiables
 
