@@ -13,6 +13,7 @@ afterwards — the commit dates should match the ADR dates.
 | 0005 | A separate Users context over a shared user model | Accepted |
 | 0006 | The dependency graph as a single consistency boundary | Proposed |
 | 0007 | No shared kernel; contexts integrate through published API modules | Accepted |
+| 0008 | Module-owned Spring configuration over wiring in the composition root | Accepted |
 
 Each ADR follows: context → options considered → decision → consequences → what we gave up.
 

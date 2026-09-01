@@ -34,7 +34,7 @@ For the red/green loop, run the one test rather than the whole build:
 | `users-impl` | `users-api`, `outbox` | same |
 | `users-api` | **nothing** | a published contract; anything it depends on becomes part of that contract |
 | `outbox` | **nothing** | takes an opaque record; a dependency here recreates the shared kernel |
-| `app` | all of the above | composition root, and the only Spring-aware module |
+| `app` | all of the above | composition root; discovers each context's own configuration by component scan (ADR-0008) |
 | `architecture-tests` | all of the above | test-only, and a leaf — see below |
 
 There is no `shared-kernel` module. One was specified in ADR-0001 and removed in ADR-0007. Do not

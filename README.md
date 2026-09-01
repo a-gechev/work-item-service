@@ -29,7 +29,7 @@ convention.
 | `users-api` | The Users context's published contract — interfaces, `UserSummary`, `UserDeactivated` |
 | `users-impl` | The Users context's domain, application and adapters |
 | `outbox` | The transactional outbox: `OutboxWriter`, `OutboxEntry`, the publishing poller |
-| `app` | The single deployable. Wires implementations to ports; the only module that knows the whole graph |
+| `app` | The single deployable. Discovers each context's own Spring configuration by component scan; the only module that knows the whole graph |
 
 **There is no shared kernel.** One was specified in ADR-0001 and removed in
 [ADR-0007](docs/adr/0007-no-shared-kernel.md): nothing turned out to belong in it. The contexts
