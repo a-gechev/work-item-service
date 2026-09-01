@@ -1,5 +1,7 @@
 # Work Item Service
 
+[![CI](https://github.com/a-gechev/work-item-service/actions/workflows/ci.yml/badge.svg)](https://github.com/a-gechev/work-item-service/actions/workflows/ci.yml)
+
 A task management service. The domain is deliberately ordinary; the engineering is the point.
 
 ## What it does
